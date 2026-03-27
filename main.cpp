@@ -17,29 +17,26 @@ int main() {
 	uint32_t value{ convertBinary(binaryString) };
 
 	DecodedInstruction inst = decodeInstruction(value);
-
-	uint32_t opcode{ getOpCode(value) };
 	
-	if (inst.type == "I-type") {
+	if (inst.type == TYPE_I) {
 		std::cout << inst.name << " x" << inst.rd << ", x" << inst.rs1 << ", " << inst.imm << '\n';
 	}
-	else if (inst.type == "Special I-type") {
+	else if (inst.type == TYPE_SHIFT) {
 		std::cout << inst.name << " x" << inst.rd << ", x" << inst.rs1 << ", " << inst.shamt << '\n';
 	}
-	else if (inst.type == "R-type") {
+	else if (inst.type == TYPE_R) {
 		std::cout << inst.name << " x" << inst.rd << ", x" << inst.rs1 << ", " << inst.rs2 << '\n';
 	}
-	else if (inst.type == "S-type") {
+	else if (inst.type == TYPE_S) {
 		std::cout << inst.name << " x" << inst.rs2 << ", " << inst.imm << "(x" << inst.rs1 << ")" << '\n';
 	}
+	else if (inst.type == TYPE_B) {
+		std::cout << inst.name << " x" << inst.rs1 << ", x" << inst.rs2 << ", " << inst.imm << '\n';
+	}
+	else if (inst.type == TYPE_J) {
+		std::cout << inst.name << " x" << inst.rd << ", " << inst.imm << '\n';
+	}
 	
-
-	std::cout << "Opcode: " << opcode << '\n';
-	std::cout << "rd: " << inst.rd << '\n';
-	std::cout << "rs1: " << inst.rs1 << '\n';
-
-
-	std::cout << std::hex << "Raw Instruction (Hex): " << value << '\n';
 
 	return 0;
 }
