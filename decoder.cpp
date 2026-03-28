@@ -103,6 +103,12 @@ int32_t getJalImm(uint32_t value) {
 	return imm;
 }
 
+int32_t getUpperImm(uint32_t value) {
+	uint32_t imm = value & 0xFFFFF000;
+
+	return imm;
+}
+
 uint32_t getFunct7(uint32_t value) {
 	uint32_t funct7 = (value >> 25) & 0x7F;
 
@@ -330,6 +336,77 @@ DecodedInstruction decodeInstruction(uint32_t value) {
 		inst.rd = getRd(value);
 		inst.imm = getJalImm(value);
 	}
+	else if (opcode == 0x37) {
+		inst.name = "lui";
+		inst.type = TYPE_U;
+		inst.rd = getRd(value);
+		inst.imm = getUpperImm(value);
+	}
+	else if (opcode == 0x17) {
+		inst.name = "auipc";
+		inst.type = TYPE_U;
+		inst.rd = getRd(value);
+		inst.imm = getUpperImm(value);
+	}
+	else if (opcode == 0x3 && funct3 == 0x0)  {
+		inst.name = "lb";
+		inst.type = TYPE_LOAD;
+		inst.rs1 = getRs1(value);
+		inst.rd = getRd(value);
+		inst.imm = getImm(value);
+	}
+	else if (opcode == 0x3 && funct3 == 0x4) {
+		inst.name = "lbu";
+		inst.type = TYPE_LOAD;
+		inst.rs1 = getRs1(value);
+		inst.rd = getRd(value);
+		inst.imm = getImm(value);
+	}
+	else if (opcode == 0x3 && funct3 == 0x1) {
+		inst.name = "lh";
+		inst.type = TYPE_LOAD;
+		inst.rs1 = getRs1(value);
+		inst.rd = getRd(value);
+		inst.imm = getImm(value);
+	}
+	else if (opcode == 0x3 && funct3 == 0x5) {
+		inst.name = "lhu";
+		inst.type = TYPE_LOAD;
+		inst.rs1 = getRs1(value);
+		inst.rd = getRd(value);
+		inst.imm = getImm(value);
+	}
+	else if (opcode == 0x3 && funct3 == 0x2) {
+		inst.name = "lw";
+		inst.type = TYPE_LOAD;
+		inst.rs1 = getRs1(value);
+		inst.rd = getRd(value);
+		inst.imm = getImm(value);
+	}
+	else if (opcode == 0x67 && funct3 == 0x0) {
+		inst.name = "jalr";
+		inst.type = TYPE_JALR;
+		inst.rs1 = getRs1(value);
+		inst.rd = getRd(value);
+		inst.imm = getImm(value);
+	}
+	else if (opcode == 0x73 && funct3 == 0x0) {
+		uint32_t funct12 = (value >> 20) & 0xFFF;
+		if (funct12 == 0x1) {
+			inst.name = "ebreak";
+			inst.type = TYPE_ENVIRONMENT;
+		}
+		else if (funct12 == 0x0) {
+			inst.name = "ecall";
+			inst.type = TYPE_ENVIRONMENT;
+		}
+	}
+	else {
+		inst.type = "Unknown Instruction";
+	}
+
+
+	
 
 
 	return inst;

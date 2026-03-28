@@ -9,6 +9,10 @@ inline const std::string TYPE_S = "S";
 inline const std::string TYPE_SHIFT = "SHIFT";
 inline const std::string TYPE_B = "B";
 inline const std::string TYPE_J = "J";
+inline const std::string TYPE_U = "U";
+inline const std::string TYPE_LOAD = "LOAD";
+inline const std::string TYPE_JALR = "JALR";
+inline const std::string TYPE_ENVIRONMENT = "ENVIRONMENT";
 
 struct DecodedInstruction {
 	std::string name; // exact instruction: addi, slli, srai
@@ -42,6 +46,8 @@ int32_t getStoreImm(uint32_t);
 int32_t getBranchImm(uint32_t);
 
 int32_t getJalImm(uint32_t);
+
+int32_t getUpperImm(uint32_t);
 
 uint32_t getFunct7(uint32_t);
 
