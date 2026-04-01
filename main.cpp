@@ -73,18 +73,32 @@ int main() {
 		Memory mem;
 		Core core;
 
-		mem.writeWord(0, convertBinary("00000000010100000000000010010011"));
-		mem.writeWord(4, convertBinary("00000000101000000000000100010011"));
-		mem.writeWord(8, convertBinary("00000000001000001000000110110011"));
-		mem.writeWord(12, convertBinary("00000000000100000000000001110011"));
+		int addr{};
+
+		while (true) {
+
+			std::cout << "Enter binary instructions (type 'done' if finished): ";
+			std::string binaryString{ getBinary() };
+
+			if (binaryString == "done") {
+				break;
+			}
+
+			uint32_t value = convertBinary(binaryString);
+
+			mem.writeWord(addr, value);
+
+			addr += 4;
+		}
+
+		mem.writeWord(addr, 0x100073);
 
 
 		core.run(mem);
 
-		std::cout << "x1 = " << core.readReg(1) << '\n';
-		std::cout << "x2 = " << core.readReg(2) << '\n';
-		std::cout << "x3 = " << core.readReg(3) << '\n';
-		std::cout << "x4 = " << core.readReg(4) << '\n';
+		for (int i{}; i < 32; i++) {
+			std::cout << "x" << i <<  " = " << core.readReg(i) << '\n';
+		}
 	}
 
 	return 0;
