@@ -754,7 +754,7 @@ DecodedInstruction decodeInstruction(uint32_t value) {
 		inst.rd = getRd(value);
 		inst.fmt = getFmt(value);
 	}
-	else if (opcode == 0x53 && funct5 == 0x1C) {
+	else if (opcode == 0x53 && funct5 == 0x1C && rm == 0x0) {
 		inst.name = Instruction::FMVXW;
 		inst.type = InstructionType::FPCONVINT;
 		inst.rs1 = getRs1(value);
