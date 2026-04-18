@@ -277,388 +277,320 @@ DecodedInstruction decodeInstruction(uint32_t value) {
 	uint32_t funct5{ getFunct5(value) };
 	uint32_t rm{ getRm(value) };
 
-	if (opcode == 0x13 && funct3 == 0x0) {
-		inst.name = Instruction::ADDI;
+	switch (opcode) {
+	case 0x33:
+		inst.type = InstructionType::R;
+		inst.rd = getRd(value);
+		inst.rs1 = getRs1(value);
+		inst.rs2 = getRs2(value);
+
+		switch (funct3) {
+		case 0x0:
+			if (funct7 == 0x0) inst.name = Instruction::ADD;
+			else if (funct7 == 0x20) inst.name = Instruction::SUB;
+			else if (funct7 == 0x1) inst.name = Instruction::MUL;
+			break;
+		case 0x7:
+			if (funct7 == 0x0) inst.name = Instruction::AND;
+			else if (funct7 == 0x1) inst.name = Instruction::REMU;
+			break;
+		case 0x6:
+			if (funct7 == 0x0) inst.name = Instruction::OR;
+			else if (funct7 == 0x1) inst.name = Instruction::REM;
+			break;
+		case 0x4:
+			if (funct7 == 0x0) inst.name = Instruction::XOR;
+			else if (funct7 == 0x1) inst.name = Instruction::DIV;
+			break;
+		case 0x1:
+			if (funct7 == 0x0) inst.name = Instruction::SLL;
+			else if (funct7 == 0x1) inst.name = Instruction::MULH;
+			break;
+		case 0x5:
+			if (funct7 == 0x0) inst.name = Instruction::SRL;
+			else if (funct7 == 0x20) inst.name = Instruction::SRA;
+			else if (funct7 == 0x1) inst.name = Instruction::DIVU;
+			break;
+		case 0x2:
+			if (funct7 == 0x0) inst.name = Instruction::SLT;
+			else if (funct7 == 0x1) inst.name = Instruction::MULHSU;
+			break;
+		case 0x3:
+			if (funct7 == 0x0) inst.name = Instruction::SLTU;
+			else if (funct7 == 0x1) inst.name = Instruction::MULHU;
+			break;
+		}
+		break;
+
+	case 0x13:
 		inst.type = InstructionType::I;
 		inst.rd = getRd(value);
 		inst.rs1 = getRs1(value);
-		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x13 && funct3 == 0x7) {
-		inst.name = Instruction::ANDI;
-		inst.type = InstructionType::I;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x13 && funct3 == 0x6) {
-		inst.name = Instruction::ORI;
-		inst.type = InstructionType::I;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x13 && funct3 == 0x4) {
-		inst.name = Instruction::XORI;
-		inst.type = InstructionType::I;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x13 && funct3 == 0x2) {
-		inst.name = Instruction::SLTI;
-		inst.type = InstructionType::I;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x13 && funct3 == 0x3) {
-		inst.name = Instruction::SLTIU;
-		inst.type = InstructionType::I;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x13 && funct3 == 0x1 && funct7 == 0x0) {
-		inst.name = Instruction::SLLI;
-		inst.type = InstructionType::SHIFT;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.shamt = getShamt(value);
-	}
-	else if (opcode == 0x13 && funct3 == 0x5 && funct7 == 0x0) {
-		inst.name = Instruction::SRLI;
-		inst.type = InstructionType::SHIFT;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.shamt = getShamt(value);
-	}
-	else if (opcode == 0x13 && funct3 == 0x5 && funct7 == 0x20) {
-		inst.name = Instruction::SRAI;
-		inst.type = InstructionType::SHIFT;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.shamt = getShamt(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x0 && funct7 == 0x0) {
-		inst.name = Instruction::ADD;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x0 && funct7 == 0x20) {
-		inst.name = Instruction::SUB;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x7 && funct7 == 0x0) {
-		inst.name = Instruction::AND;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x6 && funct7 == 0x0) {
-		inst.name = Instruction::OR;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x4 && funct7 == 0x0) {
-		inst.name = Instruction::XOR;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x1 && funct7 == 0x0) {
-		inst.name = Instruction::SLL;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x5 && funct7 == 0x0) {
-		inst.name = Instruction::SRL;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x5 && funct7 == 0x20) {
-		inst.name = Instruction::SRA;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x2 && funct7 == 0x0) {
-		inst.name = Instruction::SLT;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x3 && funct7 == 0x0) {
-		inst.name = Instruction::SLTU;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x23 && funct3 == 0x0) {
-		inst.name = Instruction::SB;
+
+		switch (funct3) {
+		case 0x0:
+			inst.name = Instruction::ADDI;
+			inst.imm = getImm(value);
+			break;
+		case 0x7:
+			inst.name = Instruction::ANDI;
+			inst.imm = getImm(value);
+			break;
+		case 0x6:
+			inst.name = Instruction::ORI;
+			inst.imm = getImm(value);
+			break;
+		case 0x4:
+			inst.name = Instruction::XORI;
+			inst.imm = getImm(value);
+			break;
+		case 0x2:
+			inst.name = Instruction::SLTI;
+			inst.imm = getImm(value);
+			break;
+		case 0x3:
+			inst.name = Instruction::SLTIU;
+			inst.imm = getImm(value);
+			break;
+		case 0x1:
+			if (funct7 == 0x0) {
+				inst.type = InstructionType::SHIFT;
+				inst.name = Instruction::SLLI;
+				inst.shamt = getShamt(value);
+			}
+			break;
+		case 0x5:
+			if (funct7 == 0x0) {
+				inst.type = InstructionType::SHIFT;
+				inst.name = Instruction::SRLI;
+				inst.shamt = getShamt(value);
+			}
+			else if (funct7 == 0x20) {
+				inst.type = InstructionType::SHIFT;
+				inst.name = Instruction::SRAI;
+				inst.shamt = getShamt(value);
+			}
+			break;
+		}
+		break;
+
+	case 0x23:
 		inst.type = InstructionType::S;
 		inst.rs1 = getRs1(value);
 		inst.rs2 = getRs2(value);
 		inst.imm = getStoreImm(value);
-	}
-	else if (opcode == 0x23 && funct3 == 0x1) {
-		inst.name = Instruction::SH;
-		inst.type = InstructionType::S;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.imm = getStoreImm(value);
-	}
-	else if (opcode == 0x23 && funct3 == 0x2) {
-		inst.name = Instruction::SW;
-		inst.type = InstructionType::S;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.imm = getStoreImm(value);
-	}
-	else if (opcode == 0x63 && funct3 == 0x0) {
-		inst.name = Instruction::BEQ;
+		switch (funct3) {
+		case 0x0:
+			inst.name = Instruction::SB;
+			break;
+		case 0x1:
+			inst.name = Instruction::SH;
+			break;
+		case 0x2:
+			inst.name = Instruction::SW;
+			break;
+		}
+		break;
+
+	case 0x63:
 		inst.type = InstructionType::B;
 		inst.rs1 = getRs1(value);
 		inst.rs2 = getRs2(value);
 		inst.imm = getBranchImm(value);
-	}
-	else if (opcode == 0x63 && funct3 == 0x1) {
-		inst.name = Instruction::BNE;
-		inst.type = InstructionType::B;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.imm = getBranchImm(value);
-	}
-	else if (opcode == 0x63 && funct3 == 0x4) {
-		inst.name = Instruction::BLT;
-		inst.type = InstructionType::B;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.imm = getBranchImm(value);
-	}
-	else if (opcode == 0x63 && funct3 == 0x6) {
-		inst.name = Instruction::BLTU;
-		inst.type = InstructionType::B;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.imm = getBranchImm(value);
-	}
-	else if (opcode == 0x63 && funct3 == 0x5) {
-		inst.name = Instruction::BGE;
-		inst.type = InstructionType::B;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.imm = getBranchImm(value);
-	}
-	else if (opcode == 0x63 && funct3 == 0x7) {
-		inst.name = Instruction::BGEU;
-		inst.type = InstructionType::B;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.imm = getBranchImm(value);
-	}
-	else if (opcode == 0x6F) {
+		switch (funct3) {
+		case 0x0:
+			inst.name = Instruction::BEQ;
+			break;
+		case 0x1:
+			inst.name = Instruction::BNE;
+			break;
+		case 0x4:
+			inst.name = Instruction::BLT;
+			break;
+		case 0x6:
+			inst.name = Instruction::BLTU;
+			break;
+		case 0x5:
+			inst.name = Instruction::BGE;
+			break;
+		case 0x7:
+			inst.name = Instruction::BGEU;
+			break;
+		}
+		break;
+
+	case 0x6F:
 		inst.name = Instruction::JAL;
 		inst.type = InstructionType::J;
 		inst.rd = getRd(value);
 		inst.imm = getJalImm(value);
-	}
-	else if (opcode == 0x37) {
+		break;
+
+	case 0x37:
 		inst.name = Instruction::LUI;
 		inst.type = InstructionType::U;
 		inst.rd = getRd(value);
 		inst.imm = getUpperImm(value);
-	}
-	else if (opcode == 0x17) {
+		break;
+
+	case 0x17:
 		inst.name = Instruction::AUIPC;
 		inst.type = InstructionType::U;
 		inst.rd = getRd(value);
 		inst.imm = getUpperImm(value);
-	}
-	else if (opcode == 0x3 && funct3 == 0x0) {
-		inst.name = Instruction::LB;
+		break;
+
+	case 0x3:
 		inst.type = InstructionType::LOAD;
 		inst.rs1 = getRs1(value);
 		inst.rd = getRd(value);
 		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x3 && funct3 == 0x4) {
-		inst.name = Instruction::LBU;
-		inst.type = InstructionType::LOAD;
-		inst.rs1 = getRs1(value);
-		inst.rd = getRd(value);
-		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x3 && funct3 == 0x1) {
-		inst.name = Instruction::LH;
-		inst.type = InstructionType::LOAD;
-		inst.rs1 = getRs1(value);
-		inst.rd = getRd(value);
-		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x3 && funct3 == 0x5) {
-		inst.name = Instruction::LHU;
-		inst.type = InstructionType::LOAD;
-		inst.rs1 = getRs1(value);
-		inst.rd = getRd(value);
-		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x3 && funct3 == 0x2) {
-		inst.name = Instruction::LW;
-		inst.type = InstructionType::LOAD;
-		inst.rs1 = getRs1(value);
-		inst.rd = getRd(value);
-		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x0 && funct7 == 0x1) {
-		inst.name = Instruction::MUL;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x1 && funct7 == 0x1) {
-		inst.name = Instruction::MULH;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x3 && funct7 == 0x1) {
-		inst.name = Instruction::MULHU;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x2 && funct7 == 0x1) {
-		inst.name = Instruction::MULHSU;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x4 && funct7 == 0x1) {
-		inst.name = Instruction::DIV;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x5 && funct7 == 0x1) {
-		inst.name = Instruction::DIVU;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x6 && funct7 == 0x1) {
-		inst.name = Instruction::REM;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x33 && funct3 == 0x7 && funct7 == 0x1) {
-		inst.name = Instruction::REMU;
-		inst.type = InstructionType::R;
-		inst.rd = getRd(value);
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-	}
-	else if (opcode == 0x67 && funct3 == 0x0) {
+		switch (funct3) {
+		case 0x0:
+			inst.name = Instruction::LB;
+			break;
+		case 0x4:
+			inst.name = Instruction::LBU;
+			break;
+		case 0x1:
+			inst.name = Instruction::LH;
+			break;
+		case 0x5:
+			inst.name = Instruction::LHU;
+			break;
+		case 0x2:
+			inst.name = Instruction::LW;
+			break;
+		}
+		break;
+
+	case 0x67:
 		inst.name = Instruction::JALR;
 		inst.type = InstructionType::JALR;
 		inst.rs1 = getRs1(value);
 		inst.rd = getRd(value);
 		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x7 && funct3 == 0x2) {
+		break;
+
+	case 0x7:
 		inst.name = Instruction::FLW;
 		inst.type = InstructionType::FPL;
 		inst.rs1 = getRs1(value);
 		inst.rd = getRd(value);
 		inst.imm = getImm(value);
-	}
-	else if (opcode == 0x27 && funct3 == 0x2) {
+		break;
+
+	case 0x27:
 		inst.name = Instruction::FSW;
 		inst.type = InstructionType::FPS;
 		inst.rs1 = getRs1(value);
 		inst.rs2 = getRs2(value);
 		inst.imm = getStoreImm(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x0) {
-		inst.name = Instruction::FADDS;
-		inst.type = InstructionType::FPA;
+		break;
+
+	case 0x53:
 		inst.rs1 = getRs1(value);
 		inst.rs2 = getRs2(value);
 		inst.rd = getRd(value);
 		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x2) {
-		inst.name = Instruction::FMULS;
-		inst.type = InstructionType::FPA;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x1) {
-		inst.name = Instruction::FSUBS;
-		inst.type = InstructionType::FPA;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x3) {
-		inst.name = Instruction::FDIVS;
-		inst.type = InstructionType::FPA;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0xB) {
-		inst.name = Instruction::FSQRT;
-		inst.type = InstructionType::FPR1;
-		inst.rs1 = getRs1(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x5 && rm == 0x0) {
-		inst.name = Instruction::FMIN;
-		inst.type = InstructionType::FMINMAX;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x5 && rm == 0x1) {
-		inst.name = Instruction::FMAX;
-		inst.type = InstructionType::FMINMAX;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x43) {
+
+		switch (funct5) {
+		case 0x0:
+			inst.name = Instruction::FADDS;
+			inst.type = InstructionType::FPA;
+			break;
+		case 0x2:
+			inst.name = Instruction::FMULS;
+			inst.type = InstructionType::FPA;
+			break;
+		case 0x1:
+			inst.name = Instruction::FSUBS;
+			inst.type = InstructionType::FPA;
+			break;
+		case 0x3:
+			inst.name = Instruction::FDIVS;
+			inst.type = InstructionType::FPA;
+			break;
+		case 0xB:
+			inst.name = Instruction::FSQRT;
+			inst.type = InstructionType::FPR1;
+			break;
+		case 0x5:
+			if (rm == 0x0) {
+				inst.name = Instruction::FMIN;
+				inst.type = InstructionType::FMINMAX;
+			}
+			else if (rm == 0x1) {
+				inst.name = Instruction::FMAX;
+				inst.type = InstructionType::FMINMAX;
+			}
+			break;
+		case 0x18:
+			if (inst.rs2 == 0x0) {
+				inst.name = Instruction::FCVTWS;
+				inst.type = InstructionType::FPCONVINT;
+			}
+			else if (inst.rs2 == 0x1) {
+				inst.name = Instruction::FCVTWUS;
+				inst.type = InstructionType::FPCONVINT;
+			}
+			break;
+		case 0x1A:
+			if (inst.rs2 == 0x0) {
+				inst.name = Instruction::FCVTSW;
+				inst.type = InstructionType::INTCONVFP;
+			}
+			else if (inst.rs2 == 0x1) {
+				inst.name = Instruction::FCVTSWU;
+				inst.type = InstructionType::INTCONVFP;
+			}
+			break;
+		case 0x4:
+			if (rm == 0x0) {
+				inst.name = Instruction::FSGNJS;
+				inst.type = InstructionType::FPA;
+			}
+			else if (rm == 0x1) {
+				inst.name = Instruction::FSGNJNS;
+				inst.type = InstructionType::FPA;
+			}
+			else if (rm == 0x2) {
+				inst.name = Instruction::FSGNJXS;
+				inst.type = InstructionType::FPA;
+			}
+			break;
+		case 0x1C:
+			if (rm == 0x0) {
+				inst.name = Instruction::FMVXW;
+				inst.type = InstructionType::FPCONVINT;
+			}
+			else if (rm == 0x1) {
+				inst.name = Instruction::FCLASSS;
+				inst.type = InstructionType::FPCONVINT;
+			}
+			break;
+		case 0x1E:
+			inst.name = Instruction::FMVWX;
+			inst.type = InstructionType::INTCONVFP;
+			break;
+		case 0x14:
+			if (rm == 0x0) {
+				inst.name = Instruction::FLES;
+				inst.type = InstructionType::FCOMP;
+			}
+			else if (rm == 0x1) {
+				inst.name = Instruction::FLTS;
+				inst.type = InstructionType::FCOMP;
+			}
+			else if (rm == 0x2) {
+				inst.name = Instruction::FEQS;
+				inst.type = InstructionType::FCOMP;
+			}
+			break;
+		}
+		break;
+
+	case 0x43:
 		inst.name = Instruction::FMADDS;
 		inst.type = InstructionType::FPR4;
 		inst.rs1 = getRs1(value);
@@ -666,8 +598,9 @@ DecodedInstruction decodeInstruction(uint32_t value) {
 		inst.rs3 = getRs3(value);
 		inst.rd = getRd(value);
 		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x47) {
+		break;
+
+	case 0x47:
 		inst.name = Instruction::FMSUBS;
 		inst.type = InstructionType::FPR4;
 		inst.rs1 = getRs1(value);
@@ -675,8 +608,9 @@ DecodedInstruction decodeInstruction(uint32_t value) {
 		inst.rs3 = getRs3(value);
 		inst.rd = getRd(value);
 		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x4B) {
+		break;
+
+	case 0x4B:
 		inst.name = Instruction::FNMSUBS;
 		inst.type = InstructionType::FPR4;
 		inst.rs1 = getRs1(value);
@@ -684,8 +618,9 @@ DecodedInstruction decodeInstruction(uint32_t value) {
 		inst.rs3 = getRs3(value);
 		inst.rd = getRd(value);
 		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x4F) {
+		break;
+
+	case 0x4F:
 		inst.name = Instruction::FNMADDS;
 		inst.type = InstructionType::FPR4;
 		inst.rs1 = getRs1(value);
@@ -693,127 +628,21 @@ DecodedInstruction decodeInstruction(uint32_t value) {
 		inst.rs3 = getRs3(value);
 		inst.rd = getRd(value);
 		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x18) {
-		inst.rs2 = getRs2(value);
+		break;
 
-		if (inst.rs2 == 0x0) {
-			inst.name = Instruction::FCVTWS;
-			inst.type = InstructionType::FPCONVINT;
-			inst.rs1 = getRs1(value);
-			inst.rd = getRd(value);
-			inst.fmt = getFmt(value);
-		}
-		else if (inst.rs2 == 0x1) {
-			inst.name = Instruction::FCVTWUS;
-			inst.type = InstructionType::FPCONVINT;
-			inst.rs1 = getRs1(value);
-			inst.rd = getRd(value);
-			inst.fmt = getFmt(value);
-		}
-	}
-	else if (opcode == 0x53 && funct5 == 0x1A) {
-		inst.rs2 = getRs2(value);
-
-		if (inst.rs2 == 0x0) {
-			inst.name = Instruction::FCVTSW;
-			inst.type = InstructionType::INTCONVFP;
-			inst.rs1 = getRs1(value);
-			inst.rd = getRd(value);
-			inst.fmt = getFmt(value);
-		}
-		else if (inst.rs2 == 0x1) {
-			inst.name = Instruction::FCVTSWU;
-			inst.type = InstructionType::INTCONVFP;
-			inst.rs1 = getRs1(value);
-			inst.rd = getRd(value);
-			inst.fmt = getFmt(value);
-		}
-	}
-	else if (opcode == 0x53 && funct5 == 0x4 && rm == 0x0) {
-		inst.name = Instruction::FSGNJS;
-		inst.type = InstructionType::FPA;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x4 && rm == 0x1) {
-		inst.name = Instruction::FSGNJNS;
-		inst.type = InstructionType::FPA;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x4 && rm == 0x2) {
-		inst.name = Instruction::FSGNJXS;
-		inst.type = InstructionType::FPA;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x1C && rm == 0x0) {
-		inst.name = Instruction::FMVXW;
-		inst.type = InstructionType::FPCONVINT;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x1E) {
-		inst.name = Instruction::FMVWX;
-		inst.type = InstructionType::INTCONVFP;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x14 && rm == 0x2) {
-		inst.name = Instruction::FEQS;
-		inst.type = InstructionType::FCOMP;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x14 && rm == 0x1) {
-		inst.name = Instruction::FLTS;
-		inst.type = InstructionType::FCOMP;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x14 && rm == 0x0) {
-		inst.name = Instruction::FLES;
-		inst.type = InstructionType::FCOMP;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x53 && funct5 == 0x1C && rm == 0x1) {
-		inst.name = Instruction::FCLASSS;
-		inst.type = InstructionType::FPCONVINT;
-		inst.rs1 = getRs1(value);
-		inst.rs2 = getRs2(value);
-		inst.rd = getRd(value);
-		inst.fmt = getFmt(value);
-	}
-	else if (opcode == 0x73 && funct3 == 0x0) {
+	case 0x73: {
 		uint32_t funct12 = (value >> 20) & 0xFFF;
-		if (funct12 == 0x1) {
-			inst.name = Instruction::EBREAK;
-			inst.type = InstructionType::ENVIRONMENT;
+		inst.type = InstructionType::ENVIRONMENT;
+		switch (funct3) {
+		case 0x0:
+			if (funct12 == 0x1) inst.name = Instruction::EBREAK;
+			else if (funct12 == 0x0) inst.name = Instruction::ECALL;
+			break;
 		}
-		else if (funct12 == 0x0) {
-			inst.name = Instruction::ECALL;
-			inst.type = InstructionType::ENVIRONMENT;
-		}
+		break;
 	}
-	else {
+
+	default:
 		inst.name = Instruction::UNKNOWN;
 		inst.type = InstructionType::UNKNOWN;
 	}

@@ -88,6 +88,9 @@ int main() {
 			else if (inst.type == InstructionType::INTCONVFP) {
 				std::cout << instructionToString(inst.name) << " f" << inst.rd << ", x" << inst.rs1 << ", " << inst.imm << '\n';
 			}
+			else if (inst.type == InstructionType::FCOMP) {
+				std::cout << instructionToString(inst.name) << " x" << inst.rd << ", f" << inst.rs1 << ", f" << inst.rs2 << ", f" << '\n';
+			}
 			else {
 				std::cout << instructionToString(inst.name) << '\n';
 			}
