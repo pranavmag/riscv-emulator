@@ -567,10 +567,64 @@ void Core::execute(const DecodedInstruction& inst, Memory& mem) {
 	}
 }
 
+void Core::fetchStage(Memory& mem) {
+	uint32_t rawInstruction = mem.readWord(pc);
+
+	next_if_id_reg.bits = rawInstruction;
+	next_if_id_reg.pc = pc;
+	next_if_id_reg.bubble = false;
+
+
+	pc += 4;
+}
+
+void Core::decodeStage(Memory& mem) {
+	if (if_id_reg.bubble) {
+		next_id_ex_reg.bubble = true;
+		return;
+	}
+
+	DecodedInstruction inst = decodeInstruction(if_id_reg.bits);
+
+	uint32_t rs1_value = readReg(inst.rs1);
+	uint32_t rs2_value = readReg(inst.rs2);
+
+	float rs1_fvalue = readFReg(inst.rs1);
+	float rs2_fvalue = readFReg(inst.rs2);
+	float rs3_fvalue = readFReg(inst.rs3);
+
+	next_id_ex_reg.inst = inst;
+	next_id_ex_reg.pc = if_id_reg.pc;
+	next_id_ex_reg.rs1Value = rs1_value;
+	next_id_ex_reg.rs2Value = rs2_value;
+	next_id_ex_reg.rs1FValue = rs1_fvalue;
+	next_id_ex_reg.rs2FValue = rs2_fvalue;
+	next_id_ex_reg.rs3FValue = rs3_fvalue;
+	next_id_ex_reg.bubble = false;
+}
+
+void Core::executeStage(Memory& mem) {
+	if (id_ex_reg.bubble) {
+		next_id_ex_reg.bubble = true;
+		return;
+	}
+
+	DecodedInstruction inst = id_ex_reg.inst;
+
+	uint32_t aluResult{};
+	float aluFResult{};
+
+
+}
+
 void Core::run(Memory& mem) {
 	while (!halted) {
-		uint32_t rawInstruction = mem.readWord(pc);
-		DecodedInstruction inst = decodeInstruction(rawInstruction);
-		execute(inst, mem);
+		
+		
+		
+		
+		//uint32_t rawInstruction = mem.readWord(pc);
+		//DecodedInstruction inst = decodeInstruction(rawInstruction);
+		//execute(inst, mem);
 	}
 }
