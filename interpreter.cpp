@@ -1148,16 +1148,37 @@ void Core::writeBackStage() {
 
 	bool isFloat = (inst.type == InstructionType::FPL || inst.type == InstructionType::FPA || inst.type == InstructionType::FPR1 ||
 		inst.type == InstructionType::FMINMAX || inst.type == InstructionType::FPR4 || inst.type == InstructionType::INTCONVFP);
+
+	if (!isFloat && inst.rd == 0) {
+		return;
+	}
+
+
+	if (inst.type == InstructionType::LOAD) {
+		writeReg(inst.rd, mem_wb_reg.memRead);
+	}
+	else if (inst.type == InstructionType::FPL) {
+		writeFReg(inst.rd, mem_wb_reg.memFRead);
+	}
+	else if (isFloat) {
+		writeFReg(inst.rd, mem_wb_reg.aluFResult);
+	}
+	else {
+		writeReg(inst.rd, mem_wb_reg.aluResult);
+	}
 }
 
 void Core::run(Memory& mem) {
 	while (!halted) {
-		
-		
-		
-		
-		//uint32_t rawInstruction = mem.readWord(pc);
-		//DecodedInstruction inst = decodeInstruction(rawInstruction);
-		//execute(inst, mem);
+		writeBackStage();
+		memoryStage(mem);
+		executeStage(mem);
+		decodeStage(mem);
+		fetchStage(mem);
+
+		if_id_reg = next_if_id_reg;
+		id_ex_reg = next_id_ex_reg;
+		ex_mem_reg = next_ex_mem_reg;
+		mem_wb_reg = next_mem_wb_reg;
 	}
 }
