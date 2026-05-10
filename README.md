@@ -109,7 +109,7 @@ Standard RISC-V Base Integer Calling Convention (as per Patterson & Hennessy):
 **Requirements:** CMake 3.20+, a C++20-capable compiler (MSVC, GCC, or Clang)
 
 ```bash
-git clone https://github.com/pranavmag/riscv-emulator
+git clone https://github.com/pranavmag/riscv-toolchain
 cd riscv-toolchain
 
 mkdir build
