@@ -73,42 +73,6 @@ void Memory::writeWord(uint32_t addr, uint32_t value) {
 	memory[addr + 3] = (value >> 24) & 0xFF;
 }
 
-void Core::fetchStage(Memory& mem) {
-	uint32_t rawInstruction = mem.readWord(pc);
-
-	next_if_id_reg.bits = rawInstruction;
-	next_if_id_reg.pc = pc;
-	next_if_id_reg.bubble = false;
-
-
-	pc += 4;
-}
-
-void Core::decodeStage(Memory& mem) {
-	if (if_id_reg.bubble) {
-		next_id_ex_reg.bubble = true;
-		return;
-	}
-
-	DecodedInstruction inst = decodeInstruction(if_id_reg.bits);
-
-	uint32_t rs1_value = readReg(inst.rs1);
-	uint32_t rs2_value = readReg(inst.rs2);
-
-	float rs1_fvalue = readFReg(inst.rs1);
-	float rs2_fvalue = readFReg(inst.rs2);
-	float rs3_fvalue = readFReg(inst.rs3);
-
-	next_id_ex_reg.inst = inst;
-	next_id_ex_reg.pc = if_id_reg.pc;
-	next_id_ex_reg.rs1Value = rs1_value;
-	next_id_ex_reg.rs2Value = rs2_value;
-	next_id_ex_reg.rs1FValue = rs1_fvalue;
-	next_id_ex_reg.rs2FValue = rs2_fvalue;
-	next_id_ex_reg.rs3FValue = rs3_fvalue;
-	next_id_ex_reg.bubble = false;
-}
-
 bool writesToRegister(InstructionType type) {
 	if (type == InstructionType::S || type == InstructionType::FPS || type == InstructionType::B ||
 		type == InstructionType::ENVIRONMENT || type == InstructionType::UNKNOWN) {
@@ -145,6 +109,64 @@ bool isFloat(InstructionType type) {
 		return true;
 	}
 	return false;
+}
+
+void Core::fetchStage(Memory& mem) {
+	if (loadUseHazard) {
+		next_if_id_reg = if_id_reg;
+		return;
+	}
+
+	uint32_t rawInstruction = mem.readWord(pc);
+
+	next_if_id_reg.bits = rawInstruction;
+	next_if_id_reg.pc = pc;
+	next_if_id_reg.bubble = false;
+
+
+	pc += 4;
+}
+
+void Core::decodeStage(Memory& mem) {
+	if (if_id_reg.bubble) {
+		next_id_ex_reg.bubble = true;
+		return;
+	}
+
+	DecodedInstruction inst = decodeInstruction(if_id_reg.bits);
+
+	bool isLoadUse = (id_ex_reg.inst.type == InstructionType::LOAD || id_ex_reg.inst.type == InstructionType::FPL);
+
+	if (!id_ex_reg.bubble && isLoadUse && id_ex_reg.inst.rd != 0) {
+		bool uses1 = usesRs1(inst.type);
+		bool uses2 = usesRs2(inst.type);
+		bool uses3 = usesRs3(inst.type);
+
+		if ((uses1 && id_ex_reg.inst.rd == inst.rs1) || (uses2 && id_ex_reg.inst.rd == inst.rs2) ||
+			(uses3 && id_ex_reg.inst.rd == inst.rs3)) {
+			loadUseHazard = true;
+			next_id_ex_reg.bubble = true;
+			return;
+		}
+	}
+
+	loadUseHazard = false;
+
+	uint32_t rs1_value = readReg(inst.rs1);
+	uint32_t rs2_value = readReg(inst.rs2);
+
+	float rs1_fvalue = readFReg(inst.rs1);
+	float rs2_fvalue = readFReg(inst.rs2);
+	float rs3_fvalue = readFReg(inst.rs3);
+
+	next_id_ex_reg.inst = inst;
+	next_id_ex_reg.pc = if_id_reg.pc;
+	next_id_ex_reg.rs1Value = rs1_value;
+	next_id_ex_reg.rs2Value = rs2_value;
+	next_id_ex_reg.rs1FValue = rs1_fvalue;
+	next_id_ex_reg.rs2FValue = rs2_fvalue;
+	next_id_ex_reg.rs3FValue = rs3_fvalue;
+	next_id_ex_reg.bubble = false;
 }
 
 void Core::executeStage(Memory& mem) {
@@ -613,7 +635,14 @@ void Core::executeStage(Memory& mem) {
 		return;
 	}
 	case Instruction::ECALL: {
-		halted = true;
+		uint32_t command = readReg(17);
+
+		if (command == 1) {
+			std::cout << static_cast<int32_t>(readReg(10)) << '\n';
+		}
+		else if (command == 93) {
+			halted = true;
+		}
 		return;
 	}
 	case Instruction::UNKNOWN: {
@@ -625,8 +654,6 @@ void Core::executeStage(Memory& mem) {
 
 	if (next_ex_mem_reg.takeBranch) {
 		pc = next_ex_mem_reg.branchTarget;
-		next_if_id_reg = IF_ID{};
-		next_id_ex_reg = ID_EX{};
 	}
 
 	next_ex_mem_reg.inst = inst;
@@ -758,12 +785,18 @@ void Core::writeBackStage() {
 }
 
 void Core::run(Memory& mem) {
+	registers[2] = 65536;
 	while (!halted) {
 		writeBackStage();
 		memoryStage(mem);
 		executeStage(mem);
 		decodeStage(mem);
 		fetchStage(mem);
+
+		if (next_ex_mem_reg.takeBranch) {;
+			next_id_ex_reg = ID_EX{};
+			next_ex_mem_reg.takeBranch = false;
+		}
 
 		if_id_reg = next_if_id_reg;
 		id_ex_reg = next_id_ex_reg;

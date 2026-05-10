@@ -95,6 +95,8 @@ struct Core {
 	EX_MEM next_ex_mem_reg;
 	MEM_WB next_mem_wb_reg;
 
+	bool loadUseHazard{ false };
+
 	void fetchStage(Memory& mem);
 
 	void decodeStage(Memory& mem);
