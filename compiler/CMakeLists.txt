@@ -1,6 +1,6 @@
 add_executable(compiler
     src/main.cpp
-)
+ "src/lexer.cpp" "src/lexer.h")
 
 target_include_directories(compiler PRIVATE src)
 
