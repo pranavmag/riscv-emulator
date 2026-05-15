@@ -17,9 +17,9 @@ struct ErrorHandling {
 
 ErrorHandling errorHandling;
 
-void run(const std::string& source, ErrorHandling errorhandling);
+void run(const std::string& source, ErrorHandling& errorhandling);
 
-void runFile(const std::string& filePath, ErrorHandling errorhandling) {
+void runFile(const std::string& filePath, ErrorHandling& errorhandling) {
 	std::ifstream file(filePath);
 	if (!file) {
 		std::cerr << "Could not open file: " << filePath << '\n';
@@ -34,7 +34,7 @@ void runFile(const std::string& filePath, ErrorHandling errorhandling) {
 	}
 }
 
-void runPrompt(ErrorHandling errorhandling) {
+void runPrompt(ErrorHandling& errorhandling) {
 	std::string userInput{};
 	while (true) {
 		std::cout << "> ";

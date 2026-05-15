@@ -5,14 +5,14 @@
 #include <vector>
 
 enum TokenType {
-	// Punctuation
+	// Single-Character
 	COMMA, SEMICOLON, LEFT_PAREN, RIGHT_PAREN,
-	LEFT_BRACE, RIGHT_BRACE,
+	LEFT_BRACE, RIGHT_BRACE, PLUS, MINUS, STAR, SLASH, PERCENT,
+	EXCLAMATION, EQUAL, GREATER, LESS, DOUBLE_QUOTE,
 
-	// Operations
-	PLUS, MINUS, STAR, SLASH, PERCENT,
-	EXCLAMATION, EXCLAMATIONEQUAL, EQUAL, EQUALEQUAL,
-	GREATER, LESS, GREATEREQUAL, LESSEQUAL,
+	// Double-Character
+	EXCLAMATION_EQUAL,EQUAL_EQUAL,
+	GREATER_EQUAL, LESS_EQUAL,
 
 	// Literals
 	STRING, NUMBER, IDENTIFIER,
@@ -28,10 +28,12 @@ enum TokenType {
 	EOF_TOKEN
 };
 
+using Literal = std::variant<std::monostate, int, float, std::string>;
+
 struct Token {
 	TokenType type;
 	std::string lexeme;
-	std::variant<std::monostate, int, float, std::string> literal;
+	Literal literal;
 	int line;
 
 	
@@ -66,6 +68,7 @@ public:
 			return '\0';
 		}
 		return source_[current_];
+		
 	}
 
 	char peekNext() const {
@@ -83,5 +86,11 @@ public:
 		return true;
 	}
 
-
+	void addToken(TokenType type);
+	void addToken(TokenType type, Literal literal);
+	std::vector<Token> scanTokens();
+	void scanToken();
+	void string();
+	void number();
+	void identifier();
 };
