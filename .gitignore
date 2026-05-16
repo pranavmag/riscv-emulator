@@ -50,4 +50,6 @@ Testing/
 # OS Generated Files
 # -------------------------------------------------------------------------
 .DS_Store
-Thumbs.dbtestFile.txt
+Thumbs.db
+
+testFile.txt
