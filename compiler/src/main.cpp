@@ -1,25 +1,14 @@
+#include "shared/error.h"
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <sstream>
 
-struct ErrorHandling {
-	bool hasError = false;
+ErrorHandling errorHandler;
 
-	void report(int line, const std::string& where, const std::string& message) {
-		std::cerr << "[line " << line << "] Error at " << where << ": " << message << '\n';
-	}
+void run(const std::string& source, ErrorHandling& errorHandler);
 
-	void error(int line, const std::string& message) {
-		report(line, "", message);
-	}
-};
-
-ErrorHandling errorHandling;
-
-void run(const std::string& source, ErrorHandling& errorhandling);
-
-void runFile(const std::string& filePath, ErrorHandling& errorhandling) {
+void runFile(const std::string& filePath, ErrorHandling& errorHandler) {
 	std::ifstream file(filePath);
 	if (!file) {
 		std::cerr << "Could not open file: " << filePath << '\n';
@@ -28,21 +17,21 @@ void runFile(const std::string& filePath, ErrorHandling& errorhandling) {
 
 	std::ostringstream buffer;
 	buffer << file.rdbuf();
-	run(buffer.str(), errorHandling);
-	if (errorHandling.hasError) {
+	run(buffer.str(), errorHandler);
+	if (errorHandler.hasError) {
 		std::exit(2);
 	}
 }
 
-void runPrompt(ErrorHandling& errorhandling) {
+void runPrompt(ErrorHandling& errorHandler) {
 	std::string userInput{};
 	while (true) {
 		std::cout << "> ";
 		if (!std::getline(std::cin >> std::ws, userInput)) {
 			break;
 		}
-		run(userInput, errorhandling);
-		errorHandling.hasError = false;
+		run(userInput, errorHandler);
+		errorHandler.hasError = false;
 	}
 }
 
@@ -51,9 +40,9 @@ int main(int argc, char* argv[]) {
 		std::cerr << "Too many arguments\n";
     }
 	else if (argc == 2) {
-		runFile(argv[1], errorHandling);
+		runFile(argv[1], errorHandler);
 	}
 	else {
-		runPrompt(errorHandling);
+		runPrompt(errorHandler);
 	}
 }

@@ -1,8 +1,31 @@
 #include "lexer.h"
+#include "shared/error.h"
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <variant>
+
+static bool isDigit(char c) {
+	if (c >= '0' && c < ':') {
+		return true;
+	}
+	return false;
+}
+
+static bool isAlpha(char c) {
+	if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c == '_')) {
+		return true;
+	}
+	return false;
+}
+
+static bool isAlphaNumeric(char c) {
+	if ((isAlpha(c)) || (c >= '0' && c < ':')) {
+		return true;
+	}
+	return false;
+}
 
 std::vector<Token> Scanner::scanTokens() {
 	while (!isAtEnd()) {
@@ -83,9 +106,17 @@ void Scanner::scanToken() {
 	case '\n': ++line_; break;
 	case '"': string(); break;
 	default:
-		std::cerr << "Unknown Operation";
-		break;
+		if (isDigit(c)) {
+			number();
+		}
+		else if (isAlpha(c)) {
+			identifier();
+		}
+		else {
+			error_.error(line_, "Unexpected Charcter.");
+		}
 	}
+
 }
 
 void Scanner::string() {
@@ -96,7 +127,7 @@ void Scanner::string() {
 		advance();
 	}
 	if (isAtEnd()) {
-		std::cerr << "Unterminated String\n";
+		error_.error(line_, "Unterminated String.");
 		return;
 	}
 	advance();
@@ -106,10 +137,56 @@ void Scanner::string() {
 }
 
 void Scanner::number() {
+	while (isDigit(peek()) && !isAtEnd()) {
+		advance();
+	}
 
+	if (peek() == '.' && isDigit(peekNext())) {
+		advance();
+		while (isDigit(peek()) && !isAtEnd()) {
+			advance();
+		}
+	}
+
+	std::string numberLiteral = source_.substr(start_, current_ - start_);
+	addToken(TokenType::NUMBER, numberLiteral);
 }
 
-void Scanner::identifier() {
+const std::unordered_map<std::string, TokenType> Scanner::keywords = {
+	{"if", TokenType::IF},
+	{"else", TokenType::ELSE},
+	{"while", TokenType::WHILE},
+	{"float", TokenType::FLOAT},
+	{"int", TokenType::INT},
+	{"void", TokenType::VOID},
+	{"char", TokenType::CHAR},
+	{"print", TokenType::PRINT},
+	{"return", TokenType::RETURN},
+};
 
+void Scanner::identifier() {
+	while (isAlphaNumeric(peek()) && !isAtEnd()) {
+		advance();
+	}
+
+	std::string text = source_.substr(start_, current_ - start_);
+	auto word = keywords.find(text);
+	
+	if (word != keywords.end()) {
+		addToken(word->second, text);
+	}
+	else {
+		addToken(TokenType::IDENTIFIER, text);
+	}
+	
+}
+
+void run(const std::string& source, ErrorHandling& errorhandling) {
+	Scanner scanner(source, errorhandling);
+	std::vector<Token> tokens = scanner.scanTokens();
+
+	for (const auto& token : tokens) {
+		std::cout << token.line << " " << token.lexeme << " " << tokenTypeToString(token.type) << '\n';
+	}
 }
 
