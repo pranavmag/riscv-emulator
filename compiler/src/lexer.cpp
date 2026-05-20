@@ -6,22 +6,22 @@
 #include <vector>
 #include <variant>
 
-static bool isDigit(char c) {
-	if (c >= '0' && c < ':') {
+constexpr bool isDigit(char c) noexcept {
+	if (c >= '0' && c <= '9') {
 		return true;
 	}
 	return false;
 }
 
-static bool isAlpha(char c) {
+constexpr bool isAlpha(char c) noexcept {
 	if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c == '_')) {
 		return true;
 	}
 	return false;
 }
 
-static bool isAlphaNumeric(char c) {
-	if ((isAlpha(c)) || (c >= '0' && c < ':')) {
+constexpr bool isAlphaNumeric(char c) noexcept {
+	if ((isAlpha(c)) || isDigit(c)) {
 		return true;
 	}
 	return false;

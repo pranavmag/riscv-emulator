@@ -4,7 +4,7 @@ add_executable(emulator
     src/decoder.h
     src/interpreter.cpp
     src/interpreter.h
- "../shared/include/shared/error.h")
+ "../shared/include/shared/error.h" "../compiler/src/ast.h")
 
 target_include_directories(emulator PRIVATE src)
 
