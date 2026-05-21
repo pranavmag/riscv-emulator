@@ -1,1 +1,47 @@
 # pragma once
+
+#include "lexer.h"
+#include "ast.h"
+#include <string>
+#include <vector>
+#include <memory>
+#include <initializer_list>
+
+class Parser {
+	std::vector<Token> tokens_;
+	int current_ = 0;
+
+public: 
+	Parser(std::vector<Token> tok) : tokens_(tok) {}
+
+	std::vector<std::unique_ptr<Stmt>> parseCode();
+
+private:
+	// Statements (Recursive Descent Parsing)
+	std::unique_ptr<Stmt> statement();
+	std::unique_ptr<Stmt> varDeclaration();
+	std::unique_ptr<Stmt> retStatement();
+	std::unique_ptr<Stmt> ifStatement();
+	std::unique_ptr<Stmt> whileStatement();
+	std::unique_ptr<Stmt> blockStatement();
+	// std::unique_ptr<Stmt> exprStatement();
+
+	// Expressions (Pratt Parsing)
+	// 1 + 2 * 3
+	// nud(1)
+	// led(left, +)
+	// int bindingPower(Token)
+	std::unique_ptr<Expr> parseExpr(int minBindingPower);
+	std::unique_ptr<Expr> nud(Token token);
+	std::unique_ptr<Expr> led(Token op, std::unique_ptr<Expr> left);
+	int bindingPower(Token token);
+
+	// Helpers
+	bool match(std::initializer_list<TokenType> types);
+	Token advance();
+	bool isAtEnd() const;
+	bool check(TokenType type) const;
+	Token consume(TokenType type, const std::string& message);
+	Token peek() const;
+	Token previous() const;
+};

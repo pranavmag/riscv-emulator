@@ -5,16 +5,13 @@
 #include <string>
 
 struct ExprVisitor {
-	// visitBinaryOp, visitUnaryOp()
-
 	virtual ~ExprVisitor() = default;
 
-	virtual int visitBinaryOp(BinaryOpNode& n) = 0;
-	virtual int visitUnaryOp(UnaryOpNode& n) = 0;
+	virtual int visitBinaryOpNode(BinaryOpNode& n) = 0;
+	virtual int visitUnaryOpNode(UnaryOpNode& n) = 0;
 	virtual Literal visitLiteralNode(LiteralNode& n) = 0;
 	virtual Token visitIdentifierNode(IdentifierNode& n) = 0;
 	virtual int visitFuncCallNode(FuncCallNode& n) = 0;
-
 
 };
 
