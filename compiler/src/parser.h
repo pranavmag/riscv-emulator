@@ -24,7 +24,6 @@ private:
 	std::unique_ptr<Stmt> ifStatement();
 	std::unique_ptr<Stmt> whileStatement();
 	std::unique_ptr<Stmt> blockStatement();
-	// std::unique_ptr<Stmt> exprStatement();
 
 	// Expressions (Pratt Parsing)
 	// 1 + 2 * 3
