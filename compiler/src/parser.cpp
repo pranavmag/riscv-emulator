@@ -38,6 +38,34 @@ Token Parser::previous() const {
 	return tokens_[current_ - 1];
 }
 
+//if (condition {}
+void Parser::synchronize() {
+	advance();
+
+
+	while (!isAtEnd()) {
+		if (previous().type == TokenType::SEMICOLON) return;
+
+		switch (peek().type) {
+		case TokenType::INT: 
+		case TokenType::FLOAT:              
+		case TokenType::VOID:               
+		case TokenType::CHAR:               
+		case TokenType::IF:                 
+		case TokenType::ELSE:              
+		case TokenType::WHILE:              
+		case TokenType::FOR:               
+		case TokenType::RETURN:             
+		case TokenType::PRINT:
+			return;
+
+		default: break;
+		}
+
+		advance();
+	}
+}
+
 int Parser::bindingPower(Token token) {
 	switch (token.type) {
 	case TokenType::EQUAL: return 5; // Assignment
@@ -162,7 +190,7 @@ std::unique_ptr<Stmt> Parser::blockStatement() {
 	);
 }
 
-// 1 + 2 * 3   x == 
+// 1 + 2 * 3   x == y 
 std::unique_ptr<Expr> Parser::parseExpr(int minBindingPower) {
 	Token tok = advance();
 	auto leftNode = nud(tok);
@@ -176,11 +204,112 @@ std::unique_ptr<Expr> Parser::parseExpr(int minBindingPower) {
 	return leftNode;
 }
 
-std::unique_ptr<Expr> Parser::nud(Token token) {
 
+std::unique_ptr<Expr> Parser::nud(Token token) {
+	// start of expressions, numbers, identifiers, unary
+	// !x or -y UnaryOpNode
+	// numbers = literalNode
+	// identifiers = identifierNode
+
+	switch (token.type) {
+		// Literal Values (Numbers, Strings)
+	case TokenType::NUMBER:
+	case TokenType::STRING:
+		return std::make_unique<LiteralNode> (token.literal);
+
+		// Identifiers
+	case TokenType::IDENTIFIER:
+		return std::make_unique<IdentifierNode> (token);
+
+	case TokenType::EXCLAMATION:
+	case TokenType::MINUS: {
+		auto op = parseExpr(100);
+		return std::make_unique<UnaryOpNode>(token, std::move(op));
+	}
+		// Grouped Expressions
+		// (1 + 2 * 4) * 3
+	case TokenType::LEFT_PAREN: {
+		auto expr = parseExpr(0);
+		consume(TokenType::RIGHT_PAREN, "Expected ')' after expression.");
+		return expr;
+	}
+	default:
+		throw std::runtime_error("Unexpected token in expression.");
+
+	}
 }
 
 std::unique_ptr<Expr> Parser::led(Token op, std::unique_ptr<Expr> left) {
+	// left to right associativity
+	switch (op.type) {
+	case TokenType::EQUAL_EQUAL:
+	case TokenType::EXCLAMATION_EQUAL:
+	case TokenType::LESS_EQUAL:
+	case TokenType::GREATER_EQUAL:
+	case TokenType::GREATER:
+	case TokenType::LESS: 
+	case TokenType::PLUS:
+	case TokenType::MINUS:
+	case TokenType::STAR:
+	case TokenType::SLASH: {
+		// a + b * c - 2
+		int bp = bindingPower(op);
+		auto right = parseExpr(bp);
+		return std::make_unique<BinaryOpNode>(
+			std::move(left),
+			op,
+			std::move(right)
+		);
+	}
 
+	//right to left associativity
+	case TokenType::EQUAL: {
+		// x = y = z;
+		int bp = bindingPower(op);
+		auto right = parseExpr(bp - 1);
+		return std::make_unique<BinaryOpNode>(
+			std::move(left),
+			op,
+			std::move(right)
+		);
+	}
+
+	// function call - functions(arg, arg, arg, ...)
+	case TokenType::LEFT_PAREN: {
+		std::vector<std::unique_ptr<Expr>> args;
+		while (!check(TokenType::RIGHT_PAREN) && !isAtEnd()) {
+			args.push_back(parseExpr(0));
+			if (!check(TokenType::COMMA)) {
+				break;
+			}
+			advance();
+		}
+
+		consume(TokenType::RIGHT_PAREN, "Expected ')' after args.");
+
+		return std::make_unique<FuncCallNode>(
+			std::move(left),
+			std::move(args)
+		);
+	}
+
+	default:
+		throw std::runtime_error("Unexpected operator in expression.");
+	}
+}
+
+std::vector<std::unique_ptr<Stmt>> Parser::parseCode() {
+	std::vector<std::unique_ptr<Stmt>> stmts;
+	while (!isAtEnd()) {
+		try {
+			stmts.push_back(statement());
+		}
+		catch (const ParseError& e) {
+			error_.error(peek().line, e.what());
+			synchronize();
+		}
+	}
+
+	return stmts;
 }
 

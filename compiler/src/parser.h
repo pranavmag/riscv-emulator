@@ -10,9 +10,10 @@
 class Parser {
 	std::vector<Token> tokens_;
 	int current_ = 0;
+	ErrorHandling& error_;
 
 public: 
-	Parser(std::vector<Token> tok) : tokens_(tok) {}
+	Parser(std::vector<Token> tok, ErrorHandling& error) : tokens_(tok), error_(error) {}
 
 	std::vector<std::unique_ptr<Stmt>> parseCode();
 
@@ -43,4 +44,11 @@ private:
 	Token consume(TokenType type, const std::string& message);
 	Token peek() const;
 	Token previous() const;
+	void synchronize();
+};
+
+
+class ParseError : public std::runtime_error {
+public:
+	ParseError(const std::string& message) : std::runtime_error(message) {}
 };

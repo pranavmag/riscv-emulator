@@ -181,12 +181,3 @@ void Scanner::identifier() {
 	
 }
 
-void run(const std::string& source, ErrorHandling& errorhandling) {
-	Scanner scanner(source, errorhandling);
-	std::vector<Token> tokens = scanner.scanTokens();
-
-	for (const auto& token : tokens) {
-		std::cout << token.line << " " << token.lexeme << " " << tokenTypeToString(token.type) << '\n';
-	}
-}
-

@@ -1,4 +1,6 @@
 #include "shared/error.h"
+#include "lexer.h"
+#include "parser.h"
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -34,6 +36,15 @@ void runPrompt(ErrorHandling& errorHandler) {
 		errorHandler.hasError = false;
 	}
 }
+
+void run(const std::string& source, ErrorHandling& errorhandling) {
+	Scanner scanner(source, errorhandling);
+	std::vector<Token> tokens = scanner.scanTokens();
+
+	Parser parser(tokens, errorhandling);
+	std::vector<std::unique_ptr<Stmt>> code = parser.parseCode();
+}
+
 
 int main(int argc, char* argv[]) {
 	if (argc > 2) {
