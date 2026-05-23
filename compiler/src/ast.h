@@ -21,6 +21,11 @@ struct BinaryOpNode : Expr {
 	std::unique_ptr<Expr> left;
 	std::unique_ptr<Expr> right; 
 	Token op;
+
+	BinaryOpNode(std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right)
+		: left(std::move(left)), right(std::move(right)), op(std::move(op)) {
+	}
+
 	void accept(ExprVisitor& v) override;
 };
 
@@ -29,12 +34,18 @@ struct UnaryOpNode : Expr {
 	Token op;
 	std::unique_ptr<Expr> operand;
 
+	UnaryOpNode(Token op, std::unique_ptr<Expr> operand)
+		: op(std::move(op)), operand(std::move(operand)) {
+	}
+
 	void accept(ExprVisitor& v) override;
 };
 
 // 90, 3.14, "hello world", etc
 struct LiteralNode : Expr {
 	Literal value;
+
+	LiteralNode(Literal value) : value(std::move(value)) {}
 
 	void accept(ExprVisitor& v) override;
 };
@@ -43,6 +54,8 @@ struct LiteralNode : Expr {
 struct IdentifierNode : Expr {
 	Token name;
 
+	IdentifierNode(Token name) : name(std::move(name)) {}
+
 	void accept(ExprVisitor& v) override;
 };
 
@@ -50,6 +63,10 @@ struct IdentifierNode : Expr {
 struct FuncCallNode : Expr {
 	std::unique_ptr<Expr> funcName;
 	std::vector<std::unique_ptr<Expr>> args;
+
+	FuncCallNode(std::unique_ptr<Expr> funcName, std::vector<std::unique_ptr<Expr>> args)
+		: funcName(std::move(funcName)), args(std::move(args)) {
+	}
 
 	void accept(ExprVisitor& v) override;
 };
@@ -67,12 +84,18 @@ struct VarDeclStmt : Stmt {
 	Token name;
 	std::unique_ptr<Expr> initializer;
 
+	VarDeclStmt(Token name, std::unique_ptr<Expr> initializer)
+		: name(std::move(name)), initializer(std::move(initializer)) {
+	}
+
 	void accept(StmtVisitor& v) override;
 };
 
 // return expr;
 struct RetStmt : Stmt {
 	std::unique_ptr<Expr> ret;
+
+	RetStmt(std::unique_ptr<Expr> ret) : ret(std::move(ret)) {}
 
 	void accept(StmtVisitor& v) override;
 };
@@ -83,6 +106,10 @@ struct IfStmt : Stmt {
 	std::unique_ptr<Stmt> branch;
 	std::unique_ptr<Stmt> elseBranch; // could be nullptr
 
+	IfStmt(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> branch, std::unique_ptr<Stmt> elseBranch)
+		: condition(std::move(condition)), branch(std::move(branch)), elseBranch(std::move(elseBranch)) {
+	}
+
 	void accept(StmtVisitor& v) override;
 };
 
@@ -91,6 +118,10 @@ struct WhileStmt : Stmt {
 	std::unique_ptr<Expr> condition;
 	std::unique_ptr<Stmt> body;
 
+	WhileStmt(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body)
+		: condition(std::move(condition)), body(std::move(body)) {
+	}
+
 	void accept(StmtVisitor& v) override;
 };
 
@@ -98,12 +129,16 @@ struct WhileStmt : Stmt {
 struct BlockStmt : Stmt {
 	std::vector<std::unique_ptr<Stmt>> body;
 
+	BlockStmt(std::vector<std::unique_ptr<Stmt>> body) : body(std::move(body)) {}
+
 	void accept(StmtVisitor& v) override;
 };
 
 // expr;
 struct ExprStmt : Stmt {
 	std::unique_ptr<Expr> expr;
+
+	ExprStmt(std::unique_ptr<Expr> expr) : expr(std::move(expr)) {}
 
 	void accept(StmtVisitor& v) override;
 };

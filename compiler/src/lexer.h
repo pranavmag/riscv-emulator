@@ -48,7 +48,7 @@ struct Token {
 	}
 };
 
-std::string tokenTypeToString(TokenType type) {
+inline std::string tokenTypeToString(TokenType type) {
 	switch (type) {
 	case TokenType::COMMA:              return "COMMA";
 	case TokenType::SEMICOLON:          return "SEMICOLON";

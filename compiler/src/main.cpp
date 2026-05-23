@@ -1,6 +1,7 @@
 #include "shared/error.h"
 #include "lexer.h"
 #include "parser.h"
+#include "astprinter.h"
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -10,7 +11,7 @@ ErrorHandling errorHandler;
 
 void run(const std::string& source, ErrorHandling& errorHandler);
 
-void runFile(const std::string& filePath, ErrorHandling& errorHandler) {
+void runFile(const std::string& filePath, ErrorHandling& errHandler) {
 	std::ifstream file(filePath);
 	if (!file) {
 		std::cerr << "Could not open file: " << filePath << '\n';
@@ -19,21 +20,21 @@ void runFile(const std::string& filePath, ErrorHandling& errorHandler) {
 
 	std::ostringstream buffer;
 	buffer << file.rdbuf();
-	run(buffer.str(), errorHandler);
-	if (errorHandler.hasError) {
+	run(buffer.str(), errHandler);
+	if (errHandler.hasError) {
 		std::exit(2);
 	}
 }
 
-void runPrompt(ErrorHandling& errorHandler) {
+void runPrompt(ErrorHandling& errHandler) {
 	std::string userInput{};
 	while (true) {
 		std::cout << "> ";
 		if (!std::getline(std::cin >> std::ws, userInput)) {
 			break;
 		}
-		run(userInput, errorHandler);
-		errorHandler.hasError = false;
+		run(userInput, errHandler);
+		errHandler.hasError = false;
 	}
 }
 
@@ -43,6 +44,11 @@ void run(const std::string& source, ErrorHandling& errorhandling) {
 
 	Parser parser(tokens, errorhandling);
 	std::vector<std::unique_ptr<Stmt>> code = parser.parseCode();
+
+	ASTPrinter printer;
+	for (auto& stmt : code) {
+		stmt->accept(printer);
+	}
 }
 
 

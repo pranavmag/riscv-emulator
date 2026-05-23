@@ -27,7 +27,7 @@ Token Parser::consume(TokenType type, const std::string& message) {
 		return advance();
 	}
 
-	std::cerr << message << '\n';
+	throw ParseError(message);
 }
 
 Token Parser::peek() const {
@@ -66,6 +66,16 @@ void Parser::synchronize() {
 	}
 }
 
+bool Parser::match(std::initializer_list<TokenType> types) {
+	for (TokenType type : types) {
+		if (check(type)) {
+			advance();
+			return true;
+		}
+	}
+	return false;
+}
+
 int Parser::bindingPower(Token token) {
 	switch (token.type) {
 	case TokenType::EQUAL: return 5; // Assignment
@@ -78,21 +88,12 @@ int Parser::bindingPower(Token token) {
 	case TokenType::PLUS:
 	case TokenType::MINUS: return 30; // ADD/SUB
 	case TokenType::STAR:
-	case TokenType::SLASH: return 40; // MUL/DIV
+	case TokenType::SLASH:
+	case TokenType::PERCENT: return 40; // MUL/DIV/MODULO
 	case TokenType::EXCLAMATION: return 50; // Unary
 	case TokenType::LEFT_PAREN: return 60; // Parenthesis
+	default: return 0;
 	}
-}
-
-
-bool Parser::match(std::initializer_list<TokenType> types) {
-	for (TokenType type : types) {
-		if (check(type)) {
-			advance();
-			return true;
-		}
-	}
-	return false;
 }
 
 std::unique_ptr<Stmt> Parser::statement() {
@@ -219,6 +220,7 @@ std::unique_ptr<Expr> Parser::nud(Token token) {
 
 		// Identifiers
 	case TokenType::IDENTIFIER:
+	case TokenType::PRINT:
 		return std::make_unique<IdentifierNode> (token);
 
 	case TokenType::EXCLAMATION:
@@ -234,7 +236,7 @@ std::unique_ptr<Expr> Parser::nud(Token token) {
 		return expr;
 	}
 	default:
-		throw std::runtime_error("Unexpected token in expression.");
+		throw ParseError("Unexpected token in expression.");
 
 	}
 }
@@ -251,7 +253,8 @@ std::unique_ptr<Expr> Parser::led(Token op, std::unique_ptr<Expr> left) {
 	case TokenType::PLUS:
 	case TokenType::MINUS:
 	case TokenType::STAR:
-	case TokenType::SLASH: {
+	case TokenType::SLASH:
+	case TokenType::PERCENT: {
 		// a + b * c - 2
 		int bp = bindingPower(op);
 		auto right = parseExpr(bp);
@@ -294,7 +297,7 @@ std::unique_ptr<Expr> Parser::led(Token op, std::unique_ptr<Expr> left) {
 	}
 
 	default:
-		throw std::runtime_error("Unexpected operator in expression.");
+		throw ParseError("Unexpected operator in expression.");
 	}
 }
 

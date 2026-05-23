@@ -143,7 +143,7 @@ In-source builds are explicitly rejected by the root CMakeLists.
 ### Compiler
 
 - [x] Lexer — tokenize C subset source
-- [ ] Parser — recursive descent, build AST
+- [x] Parser — recursive descent, build AST
 - [ ] IR Generator — three-address IR with virtual registers
 - [ ] Naive register allocator — all variables on stack
 - [ ] Code generator — emit RISC-V assembly
